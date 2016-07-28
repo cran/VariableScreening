@@ -2,8 +2,7 @@
 #'
 #' @description Implements a screening procedure proposed by Chu, Li, and Reimherr (2016) for
 #' varying coefficient longitudinal models with ultra-high dimensional
-#' predictors \url{http://imstat.org/aoas/next_issue.html}.
-#' The effect of each predictor is allowed to vary over time, approximated by
+#' predictors. The effect of each predictor is allowed to vary over time, approximated by
 #' a low-dimensional B-spline.  Within-subject correlation is handled using a
 #' generalized estimation equation approach with structure specified by the user.
 #' Variance is allowed to change over time, also approximated by a B-spline.
