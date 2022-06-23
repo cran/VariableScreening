@@ -17,17 +17,16 @@ rows of X.}
 }
 \value{
 A list with following components:
-  \item{CORR_sq:}{A vector of the unconditioned squared correlation with length equal to
+   CORR_sq A vector of the unconditioned squared correlation with length equal to
            the number of columns in the input matrix X. The hgh the unconditioned
            squared correlation is, the more desirable it is to retain the corresponding
-           X covariate in a later predictive model.}
-
-  \item{rank:}{Vector for the rank of the predictors in terms of the conditional correlation
+           X covariate in a later predictive model.
+   rank Vector for the rank of the predictors in terms of the conditional correlation
         ( \eqn{\hat{rho}*_j} in the paper). This will have length equal to the number of columns
         in the input matrix X, and will consist of a permutation of the integers 1
         through that length. A rank of 1 indicates the feature which appears to have
-        the best marginal predictive performance with largest \eqn{\hat{rho}*_j}, 2 represents
-        the second best and so forth.}
+        the best marginal predictive performance with largest  \eqn{\hat{rho}*_j}, 2 represents
+        the second best and so forth.
 }
 \description{
 Implements a screening procedure proposed by Liu, Li and
@@ -39,25 +38,35 @@ Implements a screening procedure proposed by Liu, Li and
 }
 \examples{
 set.seed(12345678)
-data1 <- simulateVCM(p=250,trueIdx = c(2, 20, 80, 120, 200))
-screenResults<- screenVCM(X = data1$X, Y = data1$Y, U = data1$U)
+results <- simulateVCM(p=400,
+                       trueIdx = c(2, 100, 300),
+                       betaFun = function(U) {
+                         beta2 <- 2*I(U>0.4)
+                         beta100 <- 1+U
+                         beta300 <- (2-3*U)^2
+                         return(c(beta2,
+                                  beta100,
+                                  beta300))
+                         })
+screenResults<- screenVCM(X = results$X,
+                          Y = results$Y,
+                          U = results$U)
 rank <- screenResults$rank
-print(which(rank <= 10))    # This prints the numbers of the columns having the best rank.
-trueIdx <- c(2, 20, 80, 120, 200)   # These were the column numbers (indices) of
-                                     # the nonnull predictors in the simulated data;
-print(rank[trueIdx])    # It can be seen that these predictors were all given high rank,
-                        # showing that the function worked well.;
+unlist(rank)
+trueIdx <- c(2,100,400, 600, 1000)
+rank[trueIdx]
 }
 \references{
 Liu, J., Li, R., & Wu, R. (2014). Feature selection for varying coefficient
             models with ultrahigh-dimensional covariates. Journal of the American Statistical
             Association, 109: 266-274. <DOI:10.1080/01621459.2013.850086>
 }
-\keyword{Variable}
 \keyword{dimensional}
-\keyword{models,}
+\keyword{feature}
+\keyword{models}
 \keyword{regression}
-\keyword{screening,}
+\keyword{screening}
+\keyword{selection}
 \keyword{ultra-high}
+\keyword{variable}
 \keyword{varying-coefficient}
-

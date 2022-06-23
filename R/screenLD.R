@@ -7,8 +7,6 @@
 #' using a generalized estimation equation approach with structure specified by the user.
 #' Variance is allowed to change over time, also approximated by a B-spline.
 #'
-#'    The function code is adapted from the relevant authors' code.  Special thanks are due to
-#'    Wanghuan Chu for providing some of the code upon which this function is based.
 #'
 #' @param X Matrix of features (for example, SNP's).
 #'        There should be one row for each observation.
@@ -23,6 +21,8 @@
 #'        the constant term.
 #' @param id Vector of integers identifying the subject to which each observation belongs.
 #'        It should have the same length as the number of rows of X.
+#' @param subset Vector of integers identifying a subset of the features of X to be
+#'        screened, the default is 1:ncol(X), i.e., to screen all columns of X.
 #' @param time Vector of real numbers identifying observation times. It should have the
 #'        same length as the number of rows of X.  We suggest using the convention of
 #'        scaling time to the interval [0,1].
@@ -45,62 +45,70 @@
 #' @importFrom expm sqrtm
 #' @importFrom stats Gamma fitted gaussian glm lm
 #'
+#' @keywords variable screening
+#' @keywords variable selection
+#' @keywords high-dimensional regression
+#' @keywords feature selection
+#'
 #' @return A list with following components:
-#'    \item{error:}{A vector of length equal to the number of columns in the input matrix X.
+#'    error A vector of length equal to the number of columns in the input matrix X.
 #'        It contains sum squared error values for regression models which include the
 #'        time-varying effects of the z covariates (if any) as well as each X covariate by
 #'        itself.  The lower this error is, the more desirable it is to retain the
-#'        corresponding X covariate in a later predictive model.}
-#'    \item{rank:}{The rank of the error measures.  This will have length equal to the number
+#'        corresponding X covariate in a later predictive model.
+#'    rank The rank of the error measures.  This will have length equal to the number
 #'        of columns in the input matrix X, and will consist of a permutation of the integers
 #'        1 through that length.  A rank of 1 indicates the feature which appears to have
-#'        the best predictive performance, 2 represents the second best and so on.}
+#'        the best predictive performance, 2 represents the second best and so on.
 #' @export screenLD
 #' @examples
 #' set.seed(12345678)
-#' data1 <- simulateLD(p=250,trueIdx = c(5, 100, 200))
-#' Jmin <- min(table(data1$id)) - 1
-#' screenResults <- screenLD(X = data1$X,
-#'                             Y = data1$Y,
-#'                             z = data1$z,
-#'                             id = data1$id,
-#'                             time = data1$time,
+#' results <- simulateLD(p=500)
+#' subset1 <- seq(1,5,2)
+#' subset2 <- seq(100,200,2)
+#' subset3 <- seq(202,400,2)
+#' subset4 <- seq(401,499,2)
+#' set <-c(subset1,subset2,subset3,subset4)
+#' Jmin <- min(table(results$id)) - 1
+#' screenResults <- screenLD(X = results$X,
+#'                             Y = results$Y,
+#'                             z = results$z,
+#'                             id = results$id,
+#'                             subset = set,
+#'                             time = results$time,
 #'                             degree = 3,
 #'                             df = 4,
 #'                             corstr = "stat_M_dep",
 #'                             M = Jmin
 #'                             )
+#'
+#'
 #' rank <- screenResults$rank
-#' print(which(rank<=10))   # Show the column indexes of the best 10 predictors;
-#' trueIdx <- c(5,100,200)
-#' print(rank[trueIdx])  # Show the ranks given to the four truly active predictors;
-#' # It is found that they all are given high ranks, indicating the function works well.
+#' unlist(rank)
+#' trueIdx <- c(5,100,200,400)
+#' rank[which(set %in% trueIdx)]
 
 
 
 screenLD <- function(X,
-                     Y,
-                     z=NULL,
-                     id,
-                     time,
-                     degree = 3,
-                     df = 4,
-                     corstr = "stat_M_dep",
-                     M = NULL) {
+                       Y,
+                       z,
+                       id,
+                       subset = 1:ncol(X),
+                       time,
+                       degree = 3,
+                       df = 4,
+                       corstr = "stat_M_dep",
+                       M = NULL) {
   sort_idx <- order(id)
   id <- id[sort_idx]
   X <- X[sort_idx, ]
   Y <- Y[sort_idx]
+  z <- z[sort_idx, ]
   time <- time[sort_idx]
-  if (!is.null(z)) {
-    z <- z[sort_idx, ,drop=FALSE]
-    if (nrow(X) != length(Y) || nrow(X) != nrow(z) || nrow(X) != length(id)) {
-      stop("X, Y, z and id should have same number of rows!")
-    }
-  } else {
-    if (nrow(X) != length(Y) || nrow(X) != length(id)) {
-      stop("X, Y, and id should have same number of rows!")
-    }
+  if (nrow(X) != length(Y) || nrow(X) != nrow(z) || nrow(X) !=
+      length(id)) {
+    stop("X, Y, z and id should have same number of rows!")
   }
   if (corstr == "stat_M_dep" || corstr == "AR-M") {
     if (!is.null(M)) {
@@ -114,9 +122,12 @@ screenLD <- function(X,
       M <- min(table(id)) - 1
   }
 
+  subset_x <- X[, subset]
+
+  #print(summary(subset_x))
   N <- length(Y)
   n <- length(unique(id))
-  p <- ncol(X)
+  p <- length(subset)
 
   ## Function used to generate basis
   Beta1BsGen <- function(u)
@@ -126,13 +137,11 @@ screenLD <- function(X,
   bsInt <- cbind(rep(1, N), bs(time, degree = degree, df = df))
   bsBase <- data.frame(bsInt)
 
-  if (!is.null(z)) {
-    for (i in 1:ncol(z)) {
-      bsZ <- t(apply(cbind(as.vector(z[, i]), bsInt), 1, Beta1BsGen))
-      index1 = ncol(bsBase) + 1
-      index2 = index1 + ncol(bsZ) - 1
-      bsBase[, index1:index2] <- bsZ
-    }
+  for (i in 1:ncol(z)) {
+    bsZ <- t(apply(cbind(as.vector(z[, i]), bsInt), 1, Beta1BsGen))
+    index1 = ncol(bsBase) + 1
+    index2 = index1 + ncol(bsZ) - 1
+    bsBase[, index1:index2] <- bsZ
   }
 
 
@@ -205,7 +214,7 @@ screenLD <- function(X,
   ########################
   rssVec <- rep(0, p)
   for (k in 1:p) {
-    bsX_k <- t(apply(cbind(X[, k], bsInt), 1, Beta1BsGen))
+    bsX_k <- t(apply(cbind(subset_x[, k], bsInt), 1, Beta1BsGen))
     bsX_k_rw <- bsX_k
     for (i in 1:n) {
       if (i == 1)

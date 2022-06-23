@@ -4,8 +4,13 @@
 \alias{simulateVCM}
 \title{Simulate a dataset for testing the performance of screenVCM}
 \usage{
-simulateVCM(n = 200, rho = 0.4, p = 1000, trueIdx = c(2, 100, 400, 600,
-  1000), betaFun = NULL, sigma = 1)
+simulateVCM(
+  n = 200,
+  rho = 0.4,
+  p = 1000,
+  trueIdx = c(2, 100, 400, 600, 1000),
+  betaFun = NULL
+)
 }
 \arguments{
 \item{n}{Number of subjects in the simulated dataset}
@@ -20,14 +25,12 @@ This should be a vector, and the values should be a subset of 1:p.}
 \item{betaFun}{A list of functions of U, one function for each entry in trueIdx,
 giving the varying effects of each active predictor in the simulated
 X matrix.}
-
-\item{sigma}{The error standard deviation of the response}
 }
 \value{
 A list with following components:
-     \item{X:}{Matrix of predictors to be screened. It will have n rows and p columns.}
-     \item{Y:}{Vector of responses.  It will have length of n.}
-     \item{U:}{A vector representing a covariate with which the coefficient functions vary.}
+     X Matrix of predictors to be screened. It will have n rows and p columns.
+     Y Vector of responses.  It will have length of n.
+     U A vector representing a covariate with which the coefficient functions vary.
 }
 \description{
 Simulates a dataset that can be used to test the screenVCM
@@ -41,4 +44,3 @@ only a few of which have nonzero effect.
 set.seed(12345678)
 results <- simulateVCM(p=1000)
 }
-

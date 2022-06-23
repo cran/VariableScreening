@@ -23,12 +23,10 @@
 #'  simulation and the choice of permutation of the columns involves no loss of generality.
 #' @param heavyTailedCovariates  If TRUE, the covariates will be generated as independent t variates,
 #'  plus covariate-specific constants.  If FALSE, they will be generated as independent standard normal variates.
-#'
-#' @importFrom stats rt
-#'
 #' @return A list with following components:
-#'      \item{X:}{Matrix of predictors to be screened. It will have n rows and p columns.}
-#'      \item{Y:}{Vector of responses. It will have length n.}
+#'      X Matrix of predictors to be screened. It will have n rows and p columns.
+#'      Y Vector of responses.  It will have length n.
+#' @importFrom stats rt
 #' @export simulateMVSIS
 #' @examples
 #' set.seed(12345678)

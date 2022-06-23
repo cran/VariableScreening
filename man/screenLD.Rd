@@ -4,8 +4,18 @@
 \alias{screenLD}
 \title{Perform high-dimensional screening for semiparametric longitudinal regression}
 \usage{
-screenLD(X, Y, z = NULL, id, time, degree = 3, df = 4,
-  corstr = "stat_M_dep", M = NULL)
+screenLD(
+  X,
+  Y,
+  z,
+  id,
+  subset = 1:ncol(X),
+  time,
+  degree = 3,
+  df = 4,
+  corstr = "stat_M_dep",
+  M = NULL
+)
 }
 \arguments{
 \item{X}{Matrix of features (for example, SNP's).
@@ -24,6 +34,9 @@ the constant term.}
 
 \item{id}{Vector of integers identifying the subject to which each observation belongs.
 It should have the same length as the number of rows of X.}
+
+\item{subset}{Vector of integers identifying a subset of the features of X to be
+screened, the default is 1:ncol(X), i.e., to screen all columns of X.}
 
 \item{time}{Vector of real numbers identifying observation times. It should have the
 same length as the number of rows of X.  We suggest using the convention of
@@ -49,15 +62,15 @@ require an M parameter. The default value is set to be 1.}
 }
 \value{
 A list with following components:
-   \item{error:}{A vector of length equal to the number of columns in the input matrix X.
+   error A vector of length equal to the number of columns in the input matrix X.
        It contains sum squared error values for regression models which include the
        time-varying effects of the z covariates (if any) as well as each X covariate by
        itself.  The lower this error is, the more desirable it is to retain the
-       corresponding X covariate in a later predictive model.}
-   \item{rank:}{The rank of the error measures.  This will have length equal to the number
+       corresponding X covariate in a later predictive model.
+   rank The rank of the error measures.  This will have length equal to the number
        of columns in the input matrix X, and will consist of a permutation of the integers
        1 through that length.  A rank of 1 indicates the feature which appears to have
-       the best predictive performance, 2 represents the second best and so on.}
+       the best predictive performance, 2 represents the second best and so on.
 }
 \description{
 Implements a screening procedure proposed by Chu, Li, and Reimherr (2016)
@@ -66,28 +79,37 @@ dimensional predictors. The effect of each predictor is allowed to vary over tim
 approximated by a low-dimensional B-spline.  Within-subject correlation is handled
 using a generalized estimation equation approach with structure specified by the user.
 Variance is allowed to change over time, also approximated by a B-spline.
-
-   The function code is adapted from the relevant authors' code.  Special thanks are due to
-   Wanghuan Chu for providing some of the code upon which this function is based.
 }
 \examples{
 set.seed(12345678)
-data1 <- simulateLD(p=250,trueIdx = c(5, 100, 200))
-Jmin <- min(table(data1$id)) - 1
-screenResults <- screenLD(X = data1$X,
-                            Y = data1$Y,
-                            z = data1$z,
-                            id = data1$id,
-                            time = data1$time,
+results <- simulateLD(p=500)
+subset1 <- seq(1,5,2)
+subset2 <- seq(100,200,2)
+subset3 <- seq(202,400,2)
+subset4 <- seq(401,499,2)
+set <-c(subset1,subset2,subset3,subset4)
+Jmin <- min(table(results$id)) - 1
+screenResults <- screenLD(X = results$X,
+                            Y = results$Y,
+                            z = results$z,
+                            id = results$id,
+                            subset = set,
+                            time = results$time,
                             degree = 3,
                             df = 4,
                             corstr = "stat_M_dep",
                             M = Jmin
                             )
-rank <- screenResults$rank
-print(which(rank<=10))   # Show the column indexes of the best 10 predictors;
-trueIdx <- c(5,100,200)
-print(rank[trueIdx])  # Show the ranks given to the four truly active predictors;
-# It is found that they all are given high ranks, indicating the function works well.
-}
 
+
+rank <- screenResults$rank
+unlist(rank)
+trueIdx <- c(5,100,200,400)
+rank[which(set \%in\% trueIdx)]
+}
+\keyword{feature}
+\keyword{high-dimensional}
+\keyword{regression}
+\keyword{screening}
+\keyword{selection}
+\keyword{variable}

@@ -16,8 +16,8 @@ will be the features screened by DC-SIS.}
 }
 \value{
 A list with following components:
-     \item{X:}{Matrix of predictors to be screened. It will have n rows and p columns.}
-     \item{Y:}{Vector of responses.  It will have length n.}
+     X Matrix of predictors to be screened. It will have n rows and p columns.
+     Y Vector of responses.  It will have length n.
 }
 \description{
 Simulates a dataset that can be used to demonstrate variable screening
@@ -40,4 +40,3 @@ Cui, H., Li, R., & Zhong, W. (2015). Model-free feature screening
 for ultrahigh dimensional discriminant analysis. Journal of the American
 Statistical Association, 110: 630-641. <DOI:10.1080/01621459.2014.920256>
 }
-

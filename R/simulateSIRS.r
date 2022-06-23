@@ -31,12 +31,10 @@
 #' @param heteroskedastic Whether the error variance should be allowed to depend on one of the predictor variables.
 #' @param SignalStrength A constant used in the simulation to increase or decrease the signal-to-noise ratio;
 #' it was set to 0.5, 1, or 2 for weaker, medium or stronger signal.
-#'
-#' @importFrom stats rt
-#'
 #' @return A list with following components:
-#'      \item{X:}{Matrix of predictors to be screened. It will have n rows and p columns.}
-#'      \item{Y:}{Vector of responses.  It will have length n.}
+#'      X Matrix of predictors to be screened. It will have n rows and p columns.
+#'      Y Vector of responses.  It will have length n.
+#' @importFrom stats rt
 #' @export simulateSIRS
 
 #' @examples
@@ -52,11 +50,22 @@ simulateSIRS <- function(n=200,
   if ((p<30)|(p>100000)) {stop("Please select a number p of predictors between 30 and 100000.")}
   if ((rho<0)|(rho>=1)) {stop("Please select a rho parameter in the interval [0,1).")}
   if (rho != 0) {
-    X <- matrix(NA,n,p)
-    X[,1] <- rnorm(n)
-    for (i in 2:p)  {
-      X[,i]=rho*X[,i-1]+sqrt(1-rho^2)*rnorm(n)
+    SigmaMatrix <- matrix(0,p,p)
+    SigmaMatrix <- rho^abs(row(SigmaMatrix)-col(SigmaMatrix));
+    # This is the within-subject covariance matrix of the X covariates.  It has the same form
+    # as an AR(1) autoregressive covariance matrix, although this is not meant to imply that the X
+    # covariates for each subject are in fact a time series.  Instead, it is just used as an
+    # example of a parsimonious but nontrivial covariance structure.
+    ev <- eigen(sigma, symmetric = TRUE)
+    # This eigenvalue decomposition takes some time if p is large, and is not necessary
+    # in the rho=0 case, so
+    if (!all(ev$values >= -sqrt(.Machine$double.eps) * abs(ev$values[1]))) {
+      warning("sigma is numerically not positive definite")
     }
+    SqrtSigmaMatrix <- ev$vectors %*% diag(sqrt(ev$values), length(ev$values)) %*% t(ev$vectors)
+    # We will generate the X predictors as independent normal, and then transform them
+    # to have covariance SigmaMatrix by premultiplying them by SqrtSigmaMatrix.
+    X <- matrix(rnorm(n*p),n,p)%*%SqrtSigmaMatrix
   } else {
     # We can save computational time by just treating all the X as independent.
     X <- matrix(rnorm(n*p),n,p)

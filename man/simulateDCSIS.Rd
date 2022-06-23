@@ -4,8 +4,7 @@
 \alias{simulateDCSIS}
 \title{Simulate a dataset for demonstrating the performance of screenIID with the DC-SIS method}
 \usage{
-simulateDCSIS(n = 200, p = 5000, rho = 0, heteroskedastic = TRUE,
-  sigma = 1)
+simulateDCSIS(n = 200, p = 5000, rho = 0, heteroskedastic = TRUE)
 }
 \arguments{
 \item{n}{Number of subjects in the dataset to be simulated.  It will also equal to the number of rows
@@ -23,13 +22,11 @@ structure.  If rho is left at the default of zero, the X covariates will be inde
 and the simulation will run faster.}
 
 \item{heteroskedastic}{Whether the error variance should be allowed to depend on one of the predictor variables.}
-
-\item{sigma}{The error standard deviation of the response}
 }
 \value{
 A list with following components:
-     \item{X:}{Matrix of predictors to be screened. It will have n rows and p columns.}
-     \item{Y:}{Vector of responses.It will have length n.}
+     X Matrix of predictors to be screened. It will have n rows and p columns.
+     Y Vector of responses.  It will have length n.
 }
 \description{
 Simulates a dataset that can be used to demonstrate variable screening
@@ -55,4 +52,3 @@ results <- simulateDCSIS()
 Li, R., Zhong, W., & Zhu, L. (2012) Feature screening via distance correlation learning. Journal of
 the American Statistical Association, 107: 1129-1139. <DOI:10.1080/01621459.2012.695654>
 }
-

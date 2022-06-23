@@ -21,13 +21,12 @@ described above.}
 \value{
 A list with following components:
 
-   \item{measurement:}{A vector of length equal to the number of columns in the input matrix X.
-               It contains estimated strength of relationship with Y.}
-
-   \item{rank:}{The rank of the error measures.  This will have length equal to the number
+   measurement A vector of length equal to the number of columns in the input matrix X.
+               It contains estimated strength of relationship with Y
+   rank The rank of the error measures.  This will have length equal to the number
        of columns in the input matrix X, and will consist of a permutation of the integers
        1 through that length.  A rank of 1 indicates the feature which appears to have
-       the best predictive performance, 2 represents the second best and so on.}
+       the best predictive performance, 2 represents the second best and so on.
 }
 \description{
 Implements one of three screening procedures: Sure Independent Ranking and
@@ -74,12 +73,8 @@ Implements one of three screening procedures: Sure Independent Ranking and
 }
 \examples{
 set.seed(12345678)
-data1 <- simulateDCSIS(n=100,p=1000)
-answers<- screenIID(X = data1$X, Y = data1$Y, method="DC-SIS")
-print(which(answers$rank<=10)) # Print the columns of X corresponding to the ten best-ranked
-                               # predictors. Note that in the simulation, the true predictors
-                               # are columns 1, 2, 12, and 22, and three of these are included,
-                               # indicating that the function worked fairly well.
+results <- simulateDCSIS(n=100,p=500)
+rank<- screenIID(X = results$X, Y = results$Y, method="DC-SIS")
 }
 \references{
 Cui, H., Li, R., & Zhong, W. (2015). Model-free feature screening for
@@ -102,12 +97,11 @@ Cui, H., Li, R., & Zhong, W. (2015). Model-free feature screening for
             screening for ultrahigh-dimensional data. Journal of the American
             Statistical Association, 106: 1464-1475. <DOI:10.1198/jasa.2011.tm10563>
 }
-\keyword{Variable}
 \keyword{analysis}
 \keyword{discriminant}
+\keyword{feature}
 \keyword{high-dimensional}
-\keyword{regression,}
-\keyword{screening,}
-\keyword{selection,}
+\keyword{regression}
+\keyword{screening}
+\keyword{selection}
 \keyword{variable}
-

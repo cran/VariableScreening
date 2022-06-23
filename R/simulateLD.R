@@ -1,19 +1,17 @@
-#' Simulate a dataset for testing the performance of screenLD
+#' Simulate a dataset for testing the performance of screenlong
 #'
-#' Simulates a dataset that can be used to test the screenLD function,
+#' Simulates a dataset that can be used to test the screenlong function,
 #' and to test the performance of the proposed method under different scenarios.
-#' The simulated dataset has two z-covariates and p X-covariates, only a
+#' The simulated dataset has two z-covariates and p x-covariates, only a
 #' few of which have nonzero effect.  There are n subjects in the simulated
-#' dataset, each having J observations, which are not necessarily evenly timed, because
-#' we randomly draw a subset to create an unbalanced dataset (unless the user
-#' sets proportionMissing=0). The within-subject correlation is assumed to be AR-1.
+#' dataset, each having J observations, which are not necessarily evenly timed,
+#' we randomly draw a subset to create an unbalanced dataset. The within-subject
+#' correlation is assumed to be AR-1.
 #'
 #' @param n Number of subjects in the simulated dataset
 #' @param J Number of observations per subject
 #' @param rho The correlation parameter for the AR-1 correlation structure.
 #' @param p The total number of features to be screened from
-#' @param proportionMissing The proportion of the observations to randomly remove, in order
-#' to create unequal numbers of measurements between subjects.
 #' @param trueIdx The indexes for the active features in the simulated x matrix.
 #' This should be a vector, and the values should be a subset of 1:p.
 #' @param beta0Fun The time-varying intercept for the data-generating model, as a function of
@@ -34,14 +32,14 @@
 #' @importFrom stats rbinom rnorm runif
 #'
 #' @return A list with following components:
-#'      \item{X:}{Matrix of features to be screened.  It will have n*J rows and p columns.}
-#'      \item{Y:}{Vector of responses.  It will have length of n*J.}
-#'      \item{z:}{A matrix representing covariates to be included in each of the screening models.
+#'      x Matrix of features to be screened.  It will have n*J rows and p columns.
+#'      y Vector of responses.  It will have length of n*J.
+#'      z A matrix representing covariates to be included in each of the screening models.
 #'        The first column will be all ones, representing the intercept.  The second will
-#'        consist of random ones and zeros, representing simulated genders.}
-#'      \item{id:}{Vector of integers identifying the subject to which each observation belongs.}
-#'      \item{time:}{Vector of real numbers identifying observation times. It should have the same
-#'           length as the number of rows of X.}
+#'        consist of random ones and zeros, representing simulated genders.
+#'      id Vector of integers identifying the subject to which each observation belongs.
+#'      time Vector of real numbers identifying observation times. It should have the same
+#'           length as the number of rows of x.
 #' @export simulateLD
 #' @examples
 #' set.seed(12345678)
@@ -51,7 +49,6 @@ simulateLD <- function(n = 100,
                        J = 10,
                        rho = 0.6,
                        p = 500,
-					             proportionMissing = 0.2,
                        trueIdx = c(5, 100, 200, 400),
                        beta0Fun = NULL,
                        betaFun = NULL,
@@ -59,8 +56,6 @@ simulateLD <- function(n = 100,
                        varFun = NULL) {
   if ((p<30)|(p>100000)) {stop("Please select a number p of predictors between 30 and 100000.")}
   if ((rho<0)|(rho>=1)) {stop("Please select a rho parameter in the interval [0,1).")}
-  if( p < max(trueIdx) && is.null(betaFun)){stop("If p is set to be less than 400, then betaFun has to be user specified.")}
-  if ((proportionMissing<0)|(proportionMissing>=1)) {stop("Please select a proportionMissing parameter in the interval [0,1).")}
   N <- n * J
   # total number of observations
   id <- rep(1:n, each = J)
@@ -94,6 +89,7 @@ simulateLD <- function(n = 100,
     }
   }
 
+  trueIdx <- c(5, 100, 200, 400)
   if (is.null(varFun))
     varFun <- function(t)
       0.5 + 3 * t ^ 3
@@ -131,7 +127,7 @@ simulateLD <- function(n = 100,
 
   xMat <- matrix(rnorm(p * N), ncol = p)
   # x-predictor
-  tVec <- as.vector(replicate(expr=sort(runif(J)),n=n))
+  tVec <- sort(runif(N))
   # time points for all observations
 
   ## Generate correlated error with time-varying variance
@@ -164,7 +160,7 @@ simulateLD <- function(n = 100,
   ## Take a subset to create unbalanced data set ##
   ########################################
 
-  obs_index <- sort(sample(1:N, size = (1-proportionMissing) * N))
+  obs_index <- sort(sample(1:N, size = 0.8 * N))
 
   yVec <- yVec[obs_index]
   zMat <- zMat[obs_index, ]

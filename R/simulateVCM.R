@@ -16,15 +16,13 @@
 #' @param betaFun A list of functions of U, one function for each entry in trueIdx,
 #'                giving the varying effects of each active predictor in the simulated
 #'                X matrix.
-#' @param sigma The error standard deviation of the response
-#'
 #' @importFrom MASS mvrnorm
 #' @importFrom stats rbinom rnorm runif pnorm
 #'
 #' @return A list with following components:
-#'      \item{X:}{Matrix of predictors to be screened. It will have n rows and p columns.}
-#'      \item{Y:}{Vector of responses.  It will have length of n.}
-#'      \item{U:}{A vector representing a covariate with which the coefficient functions vary.}
+#'      X Matrix of predictors to be screened. It will have n rows and p columns.
+#'      Y Vector of responses.  It will have length of n.
+#'      U A vector representing a covariate with which the coefficient functions vary.
 #' @export simulateVCM
 #' @examples
 #' set.seed(12345678)
@@ -35,11 +33,10 @@ simulateVCM <- function(n = 200,
                        rho = 0.4,
                        p = 1000,
                        trueIdx = c(2, 100, 400, 600, 1000),
-                       betaFun = NULL,
-                       sigma = 1) {
+                       betaFun = NULL) {
   if ((p<30)|(p>100000)) {stop("Please select a number p of predictors between 30 and 100000.")}
   if ((rho<0)|(rho>=1)) {stop("Please select a rho parameter in the interval [0,1).")}
-  if( p < max(trueIdx) && is.null(betaFun)){stop("If p is set to be less than 1000, then betaFun has to be user specified.")}
+  if( p < 1000 && is.null(betaFun)){stop("If p is set to be less than 1000, then betaFun has to be user specified.")}
   if (is.null(betaFun)) {
     betaFun <- function(U) {
       beta2 <- 2*I(U>0.4)
@@ -57,19 +54,23 @@ simulateVCM <- function(n = 200,
     }
   }
 
-  ## simulate U
-  predictors <- matrix(NA,n,p+1)
-  predictors[,1] <- rnorm(n)
-  for (i in 2:(p+1))  {
-    predictors[,i]=rho*predictors[,i-1]+sqrt(1-rho^2)*rnorm(n)
+  d0<-floor((n^.8)/(log(n^.8)))                                                                   ## screened submodel size
+  sigma<-1                                                                                        ## variance of xj's
+  covm<-diag(p+1)                                                                                 ## construct covariance matrix of X
+  covm<-sigma^2*rho^abs(row(covm)-col(covm))
+  ev<-eigen(covm, symmetric = TRUE)
+  if (!all(ev$values >= -sqrt(.Machine$double.eps) * abs(ev$values[1]))) {
+    warning("sigma is numerically not positive definite")
   }
+  covmroot<- ev$vectors %*% diag(sqrt(ev$values), length(ev$values)) %*% t(ev$vectors)            ## squre root of covariance matrix of X
 
-    ## Simulate xj's
-    U <- pnorm(predictors[,1])  ## turns U back into a Uniform(0,1) variate;
-    X<-predictors[,2:(p+1)]    ## X matrix (correlated with U)
-    xMat <- X[, trueIdx]  # For convenience, extracts only the X columns with nonzero coefficients
-    coefMat <- t(sapply(U, betaFun))   ## generate nonzero beta(U)'s as functions of U:
-    eps<-rnorm(n,0,sigma)              ## generate noise epsilon
+
+    predictor<-matrix(rnorm(n*(p+1)),n,(p+1))%*%covmroot;                                           ## jointly draw u_star and xj's from Multivariate Normal
+    U<-pnorm(predictor[,1]);                                                                        ## generate U from u_star, then U~Unif(0,1)
+    coefMat <- t(sapply(U, betaFun))                                                               ## generate nonzero beta(U)'s as functions of U:
+    X<-predictor[,2:(p+1)]                                                                          ## X matrix (correlated with U)
+    eps<-rnorm(n,0,1)                                                                                    ## generate noise epsilon
+    xMat <- X[, trueIdx]
     Y<-rowSums(coefMat*xMat)+eps          ## construct response Y using Xj's, U and epsilon
 
   results <- list()

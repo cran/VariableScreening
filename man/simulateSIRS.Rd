@@ -4,8 +4,14 @@
 \alias{simulateSIRS}
 \title{Simulate a dataset for demonstrating the performance of screenIID with the SIRS method}
 \usage{
-simulateSIRS(n = 200, p = 5000, rho = 0, HeavyTailedResponse = TRUE,
-  heteroskedastic = TRUE, SignalStrength = 1)
+simulateSIRS(
+  n = 200,
+  p = 5000,
+  rho = 0,
+  HeavyTailedResponse = TRUE,
+  heteroskedastic = TRUE,
+  SignalStrength = 1
+)
 }
 \arguments{
 \item{n}{Number of subjects in the dataset to be simulated.  It will also equal to the number of rows
@@ -32,8 +38,8 @@ it was set to 0.5, 1, or 2 for weaker, medium or stronger signal.}
 }
 \value{
 A list with following components:
-     \item{X:}{Matrix of predictors to be screened. It will have n rows and p columns.}
-     \item{Y:}{Vector of responses.  It will have length n.}
+     X Matrix of predictors to be screened. It will have n rows and p columns.
+     Y Vector of responses.  It will have length n.
 }
 \description{
 Simulates a dataset that can be used to demonstrate variable screening
@@ -57,4 +63,3 @@ Zhu, L.-P., Li, L., Li, R., & Zhu, L.-X. (2011). Model-free feature screening fo
 ultrahigh-dimensional data. Journal of the American Statistical Association, 106,
 1464-1475. <DOI:10.1198/jasa.2011.tm10563>
 }
-

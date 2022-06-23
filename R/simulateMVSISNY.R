@@ -20,8 +20,8 @@
 #' @param p Number of predictor variables (covariates) in the simulated dataset.  These covariates
 #' will be the features screened by DC-SIS.
 #' @return A list with following components:
-#'      \item{X:}{Matrix of predictors to be screened. It will have n rows and p columns.}
-#'      \item{Y:}{Vector of responses.  It will have length n.}
+#'      X Matrix of predictors to be screened. It will have n rows and p columns.
+#'      Y Vector of responses.  It will have length n.
 #' @export simulateMVSISNY
 
 #' @examples

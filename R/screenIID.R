@@ -52,20 +52,23 @@
 #' @param method Screening method.  The options are "SIRS", "DC-SIS", "MV-SIS" and "MV-SIS-NY", as
 #'      described above.
 #'
-#' @importFrom energy dcor
 #' @importFrom stats sd
+#' @importFrom energy dcor
 #'
 #' @return A list with following components:
 #'
-#'    \item{measurement:}{A vector of length equal to the number of columns in the input matrix X.
-#'                It contains estimated strength of relationship with Y.}
-#'
-#'    \item{rank:}{The rank of the error measures.  This will have length equal to the number
+#'    measurement A vector of length equal to the number of columns in the input matrix X.
+#'                It contains estimated strength of relationship with Y
+#'    rank The rank of the error measures.  This will have length equal to the number
 #'        of columns in the input matrix X, and will consist of a permutation of the integers
 #'        1 through that length.  A rank of 1 indicates the feature which appears to have
-#'        the best predictive performance, 2 represents the second best and so on.}
+#'        the best predictive performance, 2 represents the second best and so on.
 #'
-#' @keywords Variable screening, variable selection, high-dimensional regression, high-dimensional discriminant analysis
+#' @keywords variable screening
+#' @keywords variable selection
+#' @keywords high-dimensional regression
+#' @keywords high-dimensional discriminant analysis
+#' @keywords feature selection
 #'
 #' @references Cui, H., Li, R., & Zhong, W. (2015). Model-free feature screening for
 #'             ultrahigh dimensional discriminant analysis. Journal of the American
@@ -91,13 +94,8 @@
 #' @export screenIID
 #' @examples
 #' set.seed(12345678)
-#' data1 <- simulateDCSIS(n=100,p=1000)
-#' answers<- screenIID(X = data1$X, Y = data1$Y, method="DC-SIS")
-#' print(which(answers$rank<=10)) # Print the columns of X corresponding to the ten best-ranked
-#'                                # predictors. Note that in the simulation, the true predictors
-#'                                # are columns 1, 2, 12, and 22, and three of these are included,
-#'                                # indicating that the function worked fairly well.
-
+#' results <- simulateDCSIS(n=100,p=500)
+#' rank<- screenIID(X = results$X, Y = results$Y, method="DC-SIS")
 
 
 

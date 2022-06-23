@@ -2,11 +2,19 @@
 % Please edit documentation in R/simulateLD.R
 \name{simulateLD}
 \alias{simulateLD}
-\title{Simulate a dataset for testing the performance of screenLD}
+\title{Simulate a dataset for testing the performance of screenlong}
 \usage{
-simulateLD(n = 100, J = 10, rho = 0.6, p = 500,
-  proportionMissing = 0.2, trueIdx = c(5, 100, 200, 400), beta0Fun = NULL,
-  betaFun = NULL, gammaFun = NULL, varFun = NULL)
+simulateLD(
+  n = 100,
+  J = 10,
+  rho = 0.6,
+  p = 500,
+  trueIdx = c(5, 100, 200, 400),
+  beta0Fun = NULL,
+  betaFun = NULL,
+  gammaFun = NULL,
+  varFun = NULL
+)
 }
 \arguments{
 \item{n}{Number of subjects in the simulated dataset}
@@ -16,9 +24,6 @@ simulateLD(n = 100, J = 10, rho = 0.6, p = 500,
 \item{rho}{The correlation parameter for the AR-1 correlation structure.}
 
 \item{p}{The total number of features to be screened from}
-
-\item{proportionMissing}{The proportion of the observations to randomly remove, in order
-to create unequal numbers of measurements between subjects.}
 
 \item{trueIdx}{The indexes for the active features in the simulated x matrix.
 This should be a vector, and the values should be a subset of 1:p.}
@@ -43,26 +48,25 @@ given time.  If left as null, it will be specified as \code{function(t) 0.5 + 3 
 }
 \value{
 A list with following components:
-     \item{X:}{Matrix of features to be screened.  It will have n*J rows and p columns.}
-     \item{Y:}{Vector of responses.  It will have length of n*J.}
-     \item{z:}{A matrix representing covariates to be included in each of the screening models.
+     x Matrix of features to be screened.  It will have n*J rows and p columns.
+     y Vector of responses.  It will have length of n*J.
+     z A matrix representing covariates to be included in each of the screening models.
        The first column will be all ones, representing the intercept.  The second will
-       consist of random ones and zeros, representing simulated genders.}
-     \item{id:}{Vector of integers identifying the subject to which each observation belongs.}
-     \item{time:}{Vector of real numbers identifying observation times. It should have the same
-          length as the number of rows of X.}
+       consist of random ones and zeros, representing simulated genders.
+     id Vector of integers identifying the subject to which each observation belongs.
+     time Vector of real numbers identifying observation times. It should have the same
+          length as the number of rows of x.
 }
 \description{
-Simulates a dataset that can be used to test the screenLD function,
+Simulates a dataset that can be used to test the screenlong function,
 and to test the performance of the proposed method under different scenarios.
-The simulated dataset has two z-covariates and p X-covariates, only a
+The simulated dataset has two z-covariates and p x-covariates, only a
 few of which have nonzero effect.  There are n subjects in the simulated
-dataset, each having J observations, which are not necessarily evenly timed, because
-we randomly draw a subset to create an unbalanced dataset (unless the user
-sets proportionMissing=0). The within-subject correlation is assumed to be AR-1.
+dataset, each having J observations, which are not necessarily evenly timed,
+we randomly draw a subset to create an unbalanced dataset. The within-subject
+correlation is assumed to be AR-1.
 }
 \examples{
 set.seed(12345678)
 results <- simulateLD(p=1000)
 }
-
